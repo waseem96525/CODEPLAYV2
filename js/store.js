@@ -7,7 +7,7 @@ const Store = (() => {
   s = Object.assign(def(), s);
   s.settings = Object.assign(def().settings, s.settings||{});
   s.playground = Object.assign(def().playground, s.playground||{});
-  s.xp ??= 0; s.badges ??= []; s.daily ??= {}; s.best ??= {}; s.proj ??= {};
+  s.xp ??= 0; s.badges ??= []; s.daily ??= {}; s.best ??= {}; s.proj ??= {}; s.saved ??= [];
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch(e){} };
   setInterval(save, 2000);
   window.addEventListener("beforeunload", save);
@@ -24,6 +24,8 @@ const Store = (() => {
     setCode(id, c){ s.code[id]=c; },
     complete(id){ s.completed[id]=Date.now(); touchStreak(); save(); },
     addXP(n){ s.xp=(s.xp||0)+n; save(); },
+    saveProject(name, code){ const p={id:"p"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), name, ts:Date.now(), code:{html:code.html||"",css:code.css||"",js:code.js||""}}; s.saved.unshift(p); s.saved=s.saved.slice(0,20); save(); return p; },
+    delSaved(id){ s.saved=s.saved.filter(p=>p.id!==id); save(); },
     uncomplete(id){ delete s.completed[id]; save(); },
     isDone(id){ return !!s.completed[id]; },
     trackStats(track, all){

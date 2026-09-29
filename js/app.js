@@ -289,12 +289,38 @@ window.downloadCode=()=>{
 };
 window.copyCode=async()=>{ try{ await navigator.clipboard.writeText(edGet()); toast("Code copied!"); }catch(e){ toast("Copy failed"); } };
 
+function renderSaved(){
+  const el=$("#savedList"); if(!el) return;
+  const arr=Store.state.saved||[];
+  const c=$("#savedCount"); if(c) c.textContent=arr.length;
+  el.innerHTML = arr.length ? arr.map(p=>{
+    const d=new Date(p.ts).toLocaleDateString();
+    const size=(p.code.html.length+p.code.css.length+p.code.js.length);
+    return `<div class="card item"><div style="flex:1"><b>${escapeHtml(p.name)}</b><div class="muted" style="font-size:13px">${d} · ${size} chars</div></div><button onclick="loadSaved('${p.id}')">Open</button><button class="ghost" onclick="delSaved('${p.id}')">Delete</button></div>`;
+  }).join("") : `<p class="muted">No saved projects yet. Write some code and press 💾 Save.</p>`;
+}
+window.saveCurrentProject=()=>{
+  const raw=prompt("Project name:","My project");
+  if(raw===null) return;
+  const name=(raw.trim().slice(0,40)||"Untitled");
+  Store.saveProject(name, pgGet());
+  renderSaved(); toast("Project saved: "+name);
+};
+window.loadSaved=(id)=>{
+  const p=(Store.state.saved||[]).find(x=>x.id===id); if(!p) return;
+  if(!confirm("Load '"+p.name+"'? Current playground code will be replaced.")) return;
+  Store.state.playground={...p.code}; Store.save();
+  $("#pgHtml").value=p.code.html; $("#pgCss").value=p.code.css; $("#pgJs").value=p.code.js;
+  pgPreview(); toast("Loaded: "+p.name);
+};
+window.delSaved=(id)=>{ if(!confirm("Delete this saved project?")) return; Store.delSaved(id); renderSaved(); };
+
 // ---- boot ----
 window.addEventListener("DOMContentLoaded", ()=>{
   loadPgFromHash();
   document.documentElement.dataset.theme = Store.state.settings.theme==="light"?"light":"";
   applyFont();
-  refreshHome(); renderList(); renderCheats(); renderProgress(); renderBadges(); renderProjects(); updateXP(); pgPreview();
+  refreshHome(); renderList(); renderCheats(); renderProgress(); renderBadges(); renderProjects(); renderSaved(); updateXP(); pgPreview();
   $("#pgHtml").value=Store.state.playground.html; $("#pgCss").value=Store.state.playground.css; $("#pgJs").value=Store.state.playground.js;
   ["pgHtml","pgCss","pgJs"].forEach(id=>$("#"+id).addEventListener("input",()=>{clearTimeout(window.__pgt);window.__pgt=setTimeout(pgPreview,500)}));
   document.addEventListener("keydown",e=>{ if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){ if($("#view-challenge").classList.contains("active")) runCheck(); } });

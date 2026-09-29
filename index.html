@@ -136,6 +136,7 @@
     <button class="blue" onclick="pgPreview()">▶ Run</button>
     <button class="ghost" onclick="pgShare()">🔗 Share link</button>
     <button class="ghost" onclick="pgDownload()">⬇ Download</button>
+    <button onclick="saveCurrentProject()">💾 Save</button>
   </div>
   <div class="pg-grid" style="margin-top:8px">
     <div>
@@ -145,6 +146,9 @@
     </div>
     <iframe id="pgFrame" title="Playground preview" sandbox="allow-scripts" style="width:100%;height:420px;border:1px solid var(--border);border-radius:12px;background:#fff"></iframe>
   </div>
+  <h3 style="margin-top:14px">💾 My saved projects (<span id="savedCount">0</span>)</h3>
+  <p class="muted" style="font-size:13px">Saved only in this browser (max 20). Export from Progress to back them up.</p>
+  <div class="list" id="savedList"></div>
 </section>
 <!-- PROJECTS -->
 <section id="view-projects" class="view">
