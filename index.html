@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodePlay — HTML, CSS, JS Practice (No Login)</title>
+<meta name="description" content="Practice HTML, CSS, JavaScript without login. Mobile + PC.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>▶</text></svg>">
+<meta name="theme-color" content="#0f172a">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="logo" id="logoBtn" role="button" tabindex="0" aria-label="CodePlay home">▶ Code<span>Play</span></div>
+  <span id="xpPill" class="muted" style="font-size:13px"></span>
+  <nav aria-label="Main">
+    <button data-nav="home" class="primary">Home</button>
+    <button data-nav="tracks">Tracks</button>
+    <button data-nav="challenge">Challenge</button>
+    <button data-nav="projects">Projects</button>
+    <button data-nav="playground">Playground</button>
+    <button data-nav="cheats">Cheats</button>
+    <button data-nav="progress">Progress</button>
+    <button data-nav="settings">Settings</button>
+  </nav>
+</header>
+<main>
+<!-- HOME -->
+<section id="view-home" class="view active">
+  <div class="hero">
+    <div class="muted">No login · Mobile + PC · 90 challenges</div>
+    <h1>Open. Write. <span style="color:var(--accent)">See.</span></h1>
+    <p>Start coding right away — no sign-up. Open a challenge, write code, see the live preview, get instant feedback.</p>
+    <button class="primary" data-nav="tracks" style="font-size:18px;padding:14px 26px">Start Practicing →</button>
+    <p class="muted" id="totalDone" style="margin-top:10px"></p>
+    <p class="muted" id="streak"></p>
+    <p class="muted" id="homeXP"></p>
+    <p class="muted" id="homeBadges"></p>
+    <div class="card" style="max-width:560px;margin:18px auto;text-align:left"><h3 style="margin-top:0">📅 Daily Challenge</h3><p id="dailyInfo" class="muted">Loading...</p><button class="blue" onclick="openDaily()">Play today's challenge →</button></div>
+    <p class="muted" style="font-size:13px">⚠️ Progress is saved only in this browser. Export it from Settings.</p>
+  </div>
+  <div class="grid-tracks">
+    <div class="card"><h3>🟧 HTML</h3><p class="muted">30 challenges · from headings to forms</p><div class="progress"><div id="pb-html"></div></div><p id="pt-html" class="muted"></p><button data-nav="tracks" onclick="pickTrack('html')">Open HTML</button></div>
+    <div class="card"><h3>🟦 CSS</h3><p class="muted">30 challenges · from colors to animations</p><div class="progress"><div id="pb-css"></div></div><p id="pt-css" class="muted"></p><button data-nav="tracks" onclick="pickTrack('css')">Open CSS</button></div>
+    <div class="card"><h3>🟨 JavaScript</h3><p class="muted">30 challenges · from console.log to DOM events</p><div class="progress"><div id="pb-js"></div></div><p id="pt-js" class="muted"></p><button data-nav="tracks" onclick="pickTrack('js')">Open JS</button></div>
+  </div>
+  <div class="card" style="margin-top:12px"><h3>Keyboard</h3><p><span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> = Run / Check · On mobile use the quick-keys toolbar below the editor.</p></div>
+</section>
+<!-- TRACKS -->
+<section id="view-tracks" class="view">
+  <h2>Choose track & level</h2>
+  <div class="level-row" id="trackRow" role="tablist" aria-label="Track">
+    <button class="chip active" data-t="html">HTML</button>
+    <button class="chip" data-t="css">CSS</button>
+    <button class="chip" data-t="js">JavaScript</button>
+  </div>
+  <div class="level-row" id="levelRow" role="tablist" aria-label="Level">
+    <button class="chip active" data-l="beginner">Beginner</button>
+    <button class="chip" data-l="intermediate">Intermediate</button>
+    <button class="chip" data-l="advanced">Advanced</button>
+  </div>
+  <input id="searchChal" placeholder="🔍 Search challenge..." aria-label="Search challenges">
+  <p class="muted" id="chalCount"></p>
+  <div class="list" id="chalList"></div>
+</section>
+<!-- CHALLENGE -->
+<section id="view-challenge" class="view">
+  <div class="mobile-tabs" role="tablist" aria-label="Panels">
+    <button onclick="setTab('task')">📝 Task</button>
+    <button onclick="setTab('code')">💻 Code</button>
+    <button onclick="setTab('out')">👁 Output</button>
+  </div>
+  <div class="chal" id="chalWrap" data-tab="code">
+    <div class="panel" id="panelTask">
+      <header><span id="cMeta" class="muted"></span></header>
+      <div class="body">
+        <h3 id="cTitle" style="margin-top:0"></h3>
+        <p id="cDesc"></p>
+        <pre class="exp" id="cExpected"></pre>
+        <div id="dailyBanner" class="hint" style="display:none"></div>
+        <div id="hintBox"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+          <button onclick="showHint(0)">Hint 1</button>
+          <button onclick="showHint(1)">Hint 2</button>
+          <button onclick="showHint(2)">Hint 3</button>
+          <button class="ghost" onclick="showSolution()">Show Solution</button>
+        </div>
+        <div id="solBox" class="card" style="margin-top:8px"><b>Solution:</b><pre id="solCode" style="white-space:pre-wrap"></pre><button onclick="useSolution()">Load solution into editor</button></div>
+      </div>
+    </div>
+    <div class="panel" id="panelCode">
+      <header>💻 Editor <span id="timer" class="muted" style="font-size:13px">⏱ 00:00</span> <span id="doneBadge" class="muted" style="margin-left:auto"></span></header>
+      <div class="toolbar" aria-label="Quick keys">
+        <button onclick="insertKey('<')">&lt;</button><button onclick="insertKey('>')">&gt;</button>
+        <button onclick="insertKey('/')">/</button><button onclick="insertKey('{')}">{</button>
+        <button onclick="insertKey('}')">}</button><button onclick="insertKey('(')">(</button>
+        <button onclick="insertKey(')')">)</button><button onclick="insertKey(';')">;</button>
+        <button onclick="insertKey('\'')">"</button><button onclick="insertKey('Tab')">Tab</button>
+        <button onclick="fontAdj(-1)" aria-label="Smaller font">A-</button>
+        <button onclick="fontAdj(1)" aria-label="Bigger font">A+</button>
+      </div>
+      <textarea id="codeArea" class="fallback" aria-label="Code editor" spellcheck="false"></textarea>
+      <div style="display:flex;gap:6px;padding:8px;flex-wrap:wrap">
+        <button id="runBtn" class="ghost">👁 Preview</button>
+        <button id="checkBtn" class="primary">Run / Check (Ctrl+Enter)</button>
+        <button class="ghost" onclick="resetCode()">Reset</button>
+        <button class="ghost" onclick="copyCode()">⧉ Copy</button>
+        <button class="ghost" onclick="downloadCode()">⬇ Code</button>
+      </div>
+    </div>
+    <div class="panel" id="panelOut">
+      <header>👁 Live Preview + Console</header>
+      <iframe id="previewFrame" title="Live preview" sandbox="allow-scripts" srcdoc="<p>Preview appears here</p>"></iframe>
+      <div class="console" id="consoleOut" aria-label="Console output">(console empty)</div>
+      <div class="body">
+        <div id="resultBox" class="result" role="status"></div>
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+          <button id="prevBtn" onclick="goPrev()">← Prev</button>
+          <button id="nextBtn" class="blue" onclick="goNext()">Next →</button>
+          <button class="ghost" onclick="markToggle()">✓/↩ Mark</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- PLAYGROUND -->
+<section id="view-playground" class="view">
+  <h2>Playground (Free Mode)</h2>
+  <div class="pg-tabs">
+    <button onclick="pgTabSw('html')">HTML</button>
+    <button onclick="pgTabSw('css')">CSS</button>
+    <button onclick="pgTabSw('js')">JS</button>
+    <button class="blue" onclick="pgPreview()">▶ Run</button>
+    <button class="ghost" onclick="pgShare()">🔗 Share link</button>
+    <button class="ghost" onclick="pgDownload()">⬇ Download</button>
+  </div>
+  <div class="pg-grid" style="margin-top:8px">
+    <div>
+      <textarea id="pgHtml" rows="8" aria-label="Playground HTML"><h1>Hello</h1></textarea>
+      <textarea id="pgCss" rows="8" style="display:none" aria-label="Playground CSS">h1{color:green}</textarea>
+      <textarea id="pgJs" rows="8" style="display:none" aria-label="Playground JS">console.log('Hi')</textarea>
+    </div>
+    <iframe id="pgFrame" title="Playground preview" sandbox="allow-scripts" style="width:100%;height:420px;border:1px solid var(--border);border-radius:12px;background:#fff"></iframe>
+  </div>
+</section>
+<!-- PROJECTS -->
+<section id="view-projects" class="view">
+  <h2>Mini Projects</h2>
+  <p class="muted">Bigger builds, step by step. Tick off steps as you finish, or open the starter in the Playground.</p>
+  <div class="list" id="projList"></div>
+</section>
+<!-- CHEATS -->
+<section id="view-cheats" class="view">
+  <h2>Cheat Sheets</h2>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="cheatQ" placeholder="🔍 Search..." style="flex:1;min-width:200px"><select id="cheatT" style="max-width:160px"><option value="all">All</option><option value="html">HTML</option><option value="css">CSS</option><option value="js">JS</option></select></div>
+  <div id="cheatList" style="margin-top:10px"></div>
+</section>
+<!-- PROGRESS -->
+<section id="view-progress" class="view">
+  <h2>Progress (no login)</h2>
+  <p class="muted">⚠️ Progress is saved only in this browser. Export it before switching devices.</p>
+  <div class="card" id="pgStats"></div>
+  <h3 style="margin-top:14px">🏅 Badges</h3>
+  <div class="badge-grid" id="badgeGrid"></div>
+  <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button onclick="doExport()">⬇ Export JSON</button><label style="display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:10px;padding:10px;cursor:pointer">⬆ Import<input type="file" accept=".json" style="display:none" onchange="doImport(this.files[0])"></label></div>
+</section>
+<!-- SETTINGS -->
+<section id="view-settings" class="view">
+  <h2>Settings</h2>
+  <div class="card"><h3>Theme</h3><button onclick="setTheme('dark')">🌙 Dark</button> <button onclick="setTheme('light')">☀ Light</button></div>
+  <div class="card" style="margin-top:8px"><h3>Font size</h3><button onclick="fontAdj(-1)">A- smaller</button> <button onclick="fontAdj(1)">A+ bigger</button></div>
+  <div class="card" style="margin-top:8px"><h3>Danger zone</h3><button onclick="Store.reset()" style="border-color:var(--danger);color:var(--danger)">Reset all progress</button></div>
+</section>
+</main>
+<nav class="bottomnav" aria-label="Mobile">
+  <button data-nav="home">🏠</button>
+  <button data-nav="tracks">📚</button>
+  <button data-nav="challenge">💻</button>
+  <button data-nav="projects">🎯</button>
+  <button data-nav="playground">🛝</button>
+  <button data-nav="progress">📊</button>
+  <button data-nav="settings">⚙</button>
+</nav>
+<footer>CodePlay v1.0 · No login · Progress stays in this browser · Made for practice</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="js/challenges-html.js"></script>
+<script src="js/challenges-css.js"></script>
+<script src="js/challenges-js.js"></script>
+<script src="js/cheatsheets.js"></script>
+<script src="js/badges.js"></script>
+<script src="js/projects.js"></script>
+<script src="js/store.js"></script>
+<script src="js/runner.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
